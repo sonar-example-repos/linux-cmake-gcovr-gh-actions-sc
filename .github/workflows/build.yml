@@ -47,6 +47,7 @@ jobs:
             --define sonar.coverageReportPaths=coverage.xml
             --define sonar.verbose=true
             --define sonar.cfamily.reproducer=/home/runner/work/linux-cmake-gcovr-gh-actions-sc/linux-cmake-gcovr-gh-actions-sc/src/lib.cpp
+        continue-on-error: true
       - name: Upload my file
         uses: actions/upload-artifact@v4
         with:
