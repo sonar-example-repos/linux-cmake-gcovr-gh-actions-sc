@@ -31,7 +31,7 @@ jobs:
         run: |
           mkdir ${{ env.GCOV_REPORTS_DIR }}
           cd build
-          find . -name "*.gcda" | xargs gcov -r
+          find . -name "*.gcda" | xargs gcov
           find . -name "*.gcov" -exec mv {} ../${{ env.GCOV_REPORTS_DIR }}/ \;
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
