@@ -1,0 +1,50 @@
+name: SonarQube Raw Gcovr
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
+      GCOV_REPORTS_DIR: gcov-reports # Directory where .gcov report files will be collected
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Install Build Wrapper
+        uses: SonarSource/sonarqube-scan-action/install-build-wrapper@v7
+      - name: Run Build Wrapper
+        run: |
+          mkdir build
+          cmake -S . -B build
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build build/ --config Release
+      - name: Run tests to generate coverage statistics
+        run: |
+          ./build/coverage_test1
+          ./build/coverage_test2
+      - name: Collect gcov reports
+        run: |
+          mkdir ${{ env.GCOV_REPORTS_DIR }}
+          cd build
+          find . -name "*.gcda" | xargs gcov -r
+          find . -name "*.gcov" -exec mv {} ../${{ env.GCOV_REPORTS_DIR }}/ \;
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: ${{ env.GCOV_REPORTS_DIR }}
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v7
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Put the name of your token here
+        with:
+          args: >
+            -Dsonar.cfamily.compile-commands=${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json
+            -Dsonar.cfamily.gcov.reportsPath=${{ env.GCOV_REPORTS_DIR }}
+            -Dsonar.verbose=true
+        continue-on-error: true
