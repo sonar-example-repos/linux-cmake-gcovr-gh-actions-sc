@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
       - uses: actions/checkout@v4
       - name: Set up Python 3.8 for gcovr
         uses: actions/setup-python@v4
@@ -43,16 +43,16 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Put the name of your token here
         with:
           args: >
-            --define sonar.cfamily.compile-commands=${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json
-            --define sonar.coverageReportPaths=coverage.xml
-            --define sonar.verbose=true
-            # --define sonar.cfamily.reproducer=/home/runner/work/linux-cmake-gcovr-gh-actions-sc/linux-cmake-gcovr-gh-actions-sc/src/lib.cpp
+            -Dsonar.cfamily.compile-commands=${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json
+            -Dsonar.coverageReportPaths=coverage.xml
+            -Dsonar.verbose=true
         continue-on-error: true
       # - name: Upload my file
       #   uses: actions/upload-artifact@v4
       #   with:
       #     name: cfamilyreproexample
       #     path: sonar-cfamily-reproducer.tar.xz # Can be a file, directory, or wildcard (e.g., bin/*)
+      # Make sure to add -Dsonar.cfamily.reproducer=/home/runner/work/linux-cmake-gcovr-gh-actions-sc/linux-cmake-gcovr-gh-actions-sc/src/lib.cpp
       - name: Upload my file
         uses: actions/upload-artifact@v4
         with:
